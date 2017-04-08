@@ -12,7 +12,7 @@ export LC_TIME=en_US.UTF-8
 # GitHub username.
 USERNAME=lumenated
 # Name of the branch containing the Hugo source files.
-SOURCE=hugo
+SOURCE=develop
 # The commit message.
 MESSAGE="Site rebuild $(date)"
 
@@ -25,7 +25,7 @@ git subtree pull --prefix=public \
 	git@github.com:$USERNAME/$USERNAME.github.io.git master -m "Merge master"
 
 msg "Building the website"
-hugo
+hugo --theme allegiant
 
 msg "Pushing the updated \`public\` folder to the \`$SOURCE\` branch"
 git add public
