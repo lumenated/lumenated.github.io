@@ -1,21 +1,124 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on My New Hugo Site</title>
-    <link>http://example.org/post/index.xml</link>
-    <description>Recent content in Posts on My New Hugo Site</description>
+    <title>Posts on Lumenated</title>
+    <link>https://lumenated.github.io/post/index.xml</link>
+    <description>Recent content in Posts on Lumenated</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 08 Apr 2017 22:56:58 +0200</lastBuildDate>
-    <atom:link href="http://example.org/post/index.xml" rel="self" type="application/rss+xml" />
+    <copyright>Lumenated is an initiative by Thomas Farla</copyright>
+    <lastBuildDate>Sat, 08 Apr 2017 23:17:28 +0200</lastBuildDate>
+    <atom:link href="https://lumenated.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
-      <title>good to great</title>
-      <link>http://example.org/post/good-to-great/</link>
-      <pubDate>Sat, 08 Apr 2017 22:56:58 +0200</pubDate>
+      <title>views in lumen</title>
+      <link>https://lumenated.github.io/post/views-in-lumen-with-fractal/</link>
+      <pubDate>Sat, 08 Apr 2017 23:17:28 +0200</pubDate>
       
-      <guid>http://example.org/post/good-to-great/</guid>
-      <description></description>
+      <guid>https://lumenated.github.io/post/views-in-lumen-with-fractal/</guid>
+      <description>
+
+&lt;p&gt;We love the eloquent ORM which is included in the Lumen framework.
+What we dislike is using eloquent to serialize our models and output them directly to the user.
+We have been playing around with the fractal library and believe that we have come up with a nice design pattern which we would love to share with you. Before we introduce views we should evaluate why eloquent comes short in advanced serialization.&lt;/p&gt;
+
+&lt;h1 id=&#34;why-not-serialize-eloquent-models&#34;&gt;Why not serialize eloquent models?&lt;/h1&gt;
+
+&lt;p&gt;Lumen offers excellent support for basic serializing of Eloquent models. We can simply return an eloquent collection and lumen makes sure the output will be valid JSON in the response.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-php&#34;&gt;class Controller {
+    public function get($id) {
+        return Model::first($id);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This convenience becomes impracticable when there&amp;rsquo;s a need to hide certain properties from our response.
+Eloquent provides a build in solution with the &lt;em&gt;$hidden&lt;/em&gt; or &lt;em&gt;$visible&lt;/em&gt; property on a model.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-php&#34;&gt;class MyModel extends Model {
+    // This won&#39;t serialize the id property
+    protected $hidden = [&#39;id&#39;];
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It becomes more complicated when we want to format a &lt;code&gt;Carbon&lt;/code&gt; instance to another format in our output.
+We could use the &lt;em&gt;getAttribute&lt;/em&gt; method to achieve this but then we lose all functionality that &lt;code&gt;Carbon&lt;/code&gt; has to offer.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-php&#34;&gt;class MyModel extends Model {
+    public function getSomeDateAttribute() {
+        return $this-&amp;gt;someDate-&amp;gt;toISO8601String();
+    }
+}
+
+// Returns an ISO8601 string which is NOT a carbon instance anymore
+(new MyModel)-&amp;gt;someDate;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;using-fractal&#34;&gt;Using fractal&lt;/h1&gt;
+
+&lt;p&gt;Fractal wants us to create a transformer which accepts an object (an eloquent model) and outputs an array.
+This will be useful for serialization later on.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-php&#34;&gt;class MyModelTransformer {
+    public function transform(MyModel $model) {
+        return [
+            &#39;name&#39; =&amp;gt; $model-&amp;gt;name,
+            &#39;createdAt&#39; =&amp;gt; $model-&amp;gt;created_at-&amp;gt;toISO8601String(),
+        ];
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To serialize our model we can use the transformer and wrap it inside a fractal item.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-php&#34;&gt;class Controller {
+    public function get($id) {
+        // This is the fractal manager which does all the serialization
+        $manager = new Manager();
+        // We use Item to transform one Model instance
+        $item = new Item(MyModel::first(1), new MyModelTransformer);
+        // If we need to transform multiple items then we can use the Collection type.
+        // It allows us to use the same transformer again.
+        // So we define what properties should be exposed in one place only
+        // items = new Collection(MyModel::all(). new MyModelTransformer);
+
+        return response()-&amp;gt;json($manager-&amp;gt;createData($item)-&amp;gt;toArray());
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;At lumenated we like this pattern a lot but it has its shortcomings.
+The biggest being the boilerplate. For every controller method that we are going to create we need to build either an item or collection. Then we should pass it to the &lt;em&gt;createData&lt;/em&gt; method and cast the result to an array. The solution we came up with is &lt;a href=&#34;https://github.com/lumenated/fractal-views&#34;&gt;fractal views&lt;/a&gt; which abstracts the serialization away and only expects us to create the transformers.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-php&#34;&gt;class MyModelView extends Lumenated\FractalViews\View
+{
+  // The fractal transformer that has to be used for this view
+  protected $transformerClass = MyModelTransforme::class;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This view will expose:
+- the &lt;em&gt;render&lt;/em&gt; method for serializing either an item or a collection based on the given arguments
+- the &lt;em&gt;renderOne&lt;/em&gt; method which always serializes a single item
+- the &lt;em&gt;renderMany&lt;/em&gt; method which always serializes a collection&lt;/p&gt;
+
+&lt;p&gt;If we replace the boilerplate with a view. Our code will look like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-php&#34;&gt;class Controller {
+    public function get($id) {
+        $view = new MyModelView();
+        return response()-&amp;gt;json($view-&amp;gt;render(Model::find(1));
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That&amp;rsquo;s all there is to it. For more information and advanced usage please refer to the README on the &lt;a href=&#34;https://github.com/lumenated/fractal-views&#34;&gt;fractal views&lt;/a&gt; repository.&lt;/p&gt;
+
+&lt;h1 id=&#34;contribute&#34;&gt;Contribute&lt;/h1&gt;
+
+&lt;p&gt;We would love to grow and you can help us with that. Head over to the &lt;a href=&#34;https://github.com/lumenated/fractal-views&#34;&gt;fractal views&lt;/a&gt; repository and leave a star.&lt;/p&gt;
+</description>
     </item>
     
   </channel>
