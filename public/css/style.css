@@ -1,3 +1,9 @@
+.header #logo {
+    width: 100%;
+    height: 50%;
+    display: block;
+    margin: 0 auto;
+}
 .lower label:hover,
 .overlay label {
     cursor: pointer
@@ -14,7 +20,9 @@ h2 a {
 footer {
     box-sizing: border-box
 }
-.overlay ul {
+.overlay ul,
+ol,
+ul {
     list-style: none
 }
 #mainmenu,
@@ -293,7 +301,7 @@ footer {
 .footer-column {
     width: 30%;
     float: left;
-    color: #7A7B7C;
+    color: #aeaeae;
     padding: 0 1%;
     font-size: .85em
 }
@@ -324,11 +332,10 @@ footer .menu-item a:hover {
     text-decoration: none
 }
 #branding {
-    margin: 0 auto;
+    margin-left: 0;
     height: 80px;
-    max-width: 1000px;
-    padding-left: 7%;
-    padding-right: 7%;
+    padding-left: calc(55% - 62.5rem * .5);
+    padding-right: calc(55% - 62.5rem * .5)
 }
 #site-title {
     margin-top: 25px;
@@ -402,6 +409,7 @@ footer .menu-item a:hover {
 .post-heading {
     height: 350px;
     width: 50%;
+    margin-top: -1%;
     margin-left: 25%;
     display: table;
     z-index: 1
@@ -580,7 +588,7 @@ th {
 .share-icons-body svg {
     width: 30px;
     height: 30px;
-    fill: #009DDC;
+    fill: #ff6800;
     float: left;
     margin-right: 5px
 }
