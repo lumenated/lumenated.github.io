@@ -42,7 +42,7 @@ Eloquent provides a build in solution with the &lt;em&gt;$hidden&lt;/em&gt; or &
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;It becomes more complicated when we want to format a &lt;code&gt;Carbon&lt;/code&gt; instance to another format in our output.
+&lt;p&gt;It becomes more complicated when we want to change the format of a &lt;code&gt;Carbon&lt;/code&gt; instance in the response.
 We could use the &lt;em&gt;getAttribute&lt;/em&gt; method to achieve this but then we lose all functionality that &lt;code&gt;Carbon&lt;/code&gt; has to offer.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-php&#34;&gt;class MyModel extends Model {
