@@ -30,7 +30,7 @@ class MyModel extends Model {
 }
 ```
 
-It becomes more complicated when we want to format a `Carbon` instance to another format in our output.
+It becomes more complicated when we want to change the format of a `Carbon` instance in the response.
 We could use the _getAttribute_ method to achieve this but then we lose all functionality that `Carbon` has to offer.
 
 ```php
